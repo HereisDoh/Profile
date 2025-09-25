@@ -1,1 +1,93 @@
+<!doctype html>
+</footer>
+</div>
 
+
+<script>
+// Basic interactivity — copy username, toggle friend status, small animations
+const copyBtn = document.getElementById('copyBtn');
+const usernameEl = document.getElementById('username');
+const addBtn = document.getElementById('addBtn');
+const friendsCount = document.getElementById('friendsCount');
+
+
+copyBtn.addEventListener('click', async () => {
+const text = usernameEl.textContent.trim();
+try{
+await navigator.clipboard.writeText('@' + text);
+copyBtn.textContent = '✅';
+setTimeout(()=>copyBtn.textContent='📋',1000);
+}catch(e){
+alert('Copy: @' + text);
+}
+});
+
+
+let added = false;
+addBtn.addEventListener('click', () =>{
+added = !added;
+if(added){
+addBtn.textContent = 'Added';
+addBtn.style.opacity = 0.95;
+addBtn.classList.remove('btn-primary');
+addBtn.classList.add('btn-outline');
+// increment friends
+friendsCount.textContent = String(Number(friendsCount.textContent) + 1);
+}else{
+addBtn.textContent = 'Add Friend';
+addBtn.classList.remove('btn-outline');
+addBtn.classList.add('btn-primary');
+friendsCount.textContent = String(Math.max(0, Number(friendsCount.textContent) - 1));
+}
+});
+
+
+// small cheeky message button
+document.getElementById('messageBtn').addEventListener('click', ()=>{
+alert('This is a static template. Integrate with your backend or open a chat deep-link.');
+});
+
+
+// Example: allow quick editing by double-clicking name fields
+const displayName = document.getElementById('displayName');
+const avatar = document.getElementById('avatar');
+const bio = document.getElementById('bio');
+
+
+function makeEditable(el, placeholder=undefined){
+el.addEventListener('dblclick', ()=>{
+const current = el.textContent;
+const input = document.createElement('input');
+input.type='text';input.value=current;input.style.width='100%';input.style.fontSize='inherit';
+el.replaceWith(input);input.focus();
+input.addEventListener('blur', ()=>{finish(input)});
+input.addEventListener('keydown', (e)=>{if(e.key==='Enter') finish(input)});
+function finish(inp){
+const txt = inp.value.trim()||placeholder||'—';
+const span = document.createElement('div');span.textContent=txt;span.id=el.id;span.className=el.className;
+inp.replaceWith(span);
+// reattach editable behavior
+makeEditable(span,placeholder);
+// update avatar initials if display name changed
+if(span.id==='displayName'){
+const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+avatar.textContent = initials || '👻';
+}
+}
+});
+}
+
+
+makeEditable(displayName,'HeyHey');
+makeEditable(bio,'Add a bio...');
+
+
+// seed avatar initials
+(function(){
+const txt = displayName.textContent.trim();
+const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+avatar.textContent = initials || 'HH';
+})();
+</script>
+</body>
+</html>
