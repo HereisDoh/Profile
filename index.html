@@ -1,93 +1,233 @@
 <!doctype html>
-</footer>
-</div>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Snapchat-style Profile (Template)</title>
+  <style>
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(circle at 10% 20%, #fbe8ff 0%, rgba(251,232,255,0) 40%),
+                  radial-gradient(circle at 90% 80%, #e8fbff 0%, rgba(232,251,255,0) 30%),
+                  linear-gradient(135deg,#fffaf0,#f6fff9);
+      display:flex;align-items:center;justify-content:center;padding:32px;
+      -webkit-font-smoothing:antialiased;
+    }
 
+    /* Card */
+    .profile-card{
+      width:360px;
+      max-width:95vw;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.9));
+      border-radius:20px;box-shadow:0 10px 30px rgba(20,20,40,0.08);
+      overflow:hidden;border:1px solid rgba(0,0,0,0.04);
+    }
 
-<script>
-// Basic interactivity — copy username, toggle friend status, small animations
-const copyBtn = document.getElementById('copyBtn');
-const usernameEl = document.getElementById('username');
-const addBtn = document.getElementById('addBtn');
-const friendsCount = document.getElementById('friendsCount');
+    /* Header (snapcode + background) */
+    .profile-header{
+      padding:18px;display:flex;gap:14px;align-items:center;
+      background: linear-gradient(90deg, rgba(255,246,230,0.7), rgba(235,244,255,0.6));
+    }
 
+    /* Snapcode simulation */
+    .snapcode{
+      width:86px;height:86px;background: #fff;border-radius:12px;display:flex;align-items:center;justify-content:center;
+      position:relative;padding:8px;border:4px solid #fffbcc;box-shadow:0 6px 18px rgba(80,60,120,0.06);
+    }
+    .snapcode .ghost{
+      width:56px;height:56px;background:linear-gradient(180deg,#fff,#f8f8ff);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#222;font-size:28px;
+      border:2px dashed rgba(0,0,0,0.06);
+    }
+    /* dotted matrix look */
+    .snapcode::before{
+      content:'';position:absolute;inset:6px;border-radius:8px;background-image: radial-gradient(circle,#000 7%,rgba(0,0,0,0) 8%);
+      background-size: 10px 10px;opacity:0.06;transform:rotate(0deg);
+      pointer-events:none;
+    }
 
-copyBtn.addEventListener('click', async () => {
-const text = usernameEl.textContent.trim();
-try{
-await navigator.clipboard.writeText('@' + text);
-copyBtn.textContent = '✅';
-setTimeout(()=>copyBtn.textContent='📋',1000);
-}catch(e){
-alert('Copy: @' + text);
-}
-});
+    .profile-main{padding:18px}
+    .identity{display:flex;align-items:center;gap:12px}
+    .avatar{
+      width:72px;height:72px;border-radius:14px;background:linear-gradient(180deg,#ffd8e8,#fff7ea);display:flex;align-items:center;justify-content:center;font-weight:800;color:#3a2a4d;font-size:26px;border:3px solid rgba(255,255,255,0.7);
+      box-shadow:0 6px 14px rgba(80,60,120,0.06);
+    }
 
+    .names{flex:1}
+    .display-name{font-weight:700;font-size:18px;color:#2b2630}
+    .username{color:#6c6b75;font-size:13px;margin-top:4px}
 
-let added = false;
-addBtn.addEventListener('click', () =>{
-added = !added;
-if(added){
-addBtn.textContent = 'Added';
-addBtn.style.opacity = 0.95;
-addBtn.classList.remove('btn-primary');
-addBtn.classList.add('btn-outline');
-// increment friends
-friendsCount.textContent = String(Number(friendsCount.textContent) + 1);
-}else{
-addBtn.textContent = 'Add Friend';
-addBtn.classList.remove('btn-outline');
-addBtn.classList.add('btn-primary');
-friendsCount.textContent = String(Math.max(0, Number(friendsCount.textContent) - 1));
-}
-});
+    .meta{display:flex;gap:10px;margin-top:12px}
+    .meta .pill{background:rgba(0,0,0,0.03);padding:8px 10px;border-radius:999px;font-size:13px;color:#201f26}
 
+    /* Story ring */
+    .story-ring{
+      width:82px;height:82px;border-radius:999px;display:grid;place-items:center;background:conic-gradient(#ffd28a, #ffd28a 30%, #ffb2e6 30%, #ffb2e6 60%, #b8e3ff 60%);
+      padding:6px;box-shadow:0 8px 28px rgba(60,50,80,0.06);
+    }
+    .story-inner{width:100%;height:100%;background:#fff;border-radius:999px;display:grid;place-items:center}
 
-// small cheeky message button
-document.getElementById('messageBtn').addEventListener('click', ()=>{
-alert('This is a static template. Integrate with your backend or open a chat deep-link.');
-});
+    /* Buttons */
+    .actions{display:flex;gap:10px;margin-top:16px}
+    .btn{flex:1;padding:10px 12px;border-radius:12px;border:0;font-weight:700;cursor:pointer}
+    .btn-primary{background:linear-gradient(90deg,#ffb2e6,#ffd28a);color:#2b2630}
+    .btn-outline{background:transparent;border:1px solid rgba(43,38,48,0.08);color:#2b2630}
 
+    .stats{display:flex;gap:8px;margin-top:14px}
+    .stat{flex:1;background:rgba(0,0,0,0.03);padding:12px;border-radius:12px;text-align:center}
+    .stat .num{font-weight:800;font-size:16px}
+    .stat .label{font-size:12px;color:#675f6b;margin-top:6px}
 
-// Example: allow quick editing by double-clicking name fields
-const displayName = document.getElementById('displayName');
-const avatar = document.getElementById('avatar');
-const bio = document.getElementById('bio');
+    .bio{margin-top:14px;font-size:14px;color:#3a3340}
 
+    /* small utilities */
+    .muted{color:#7b7780;font-size:13px}
+    .copy-icon{font-size:12px;margin-left:6px;opacity:0.8}
 
-function makeEditable(el, placeholder=undefined){
-el.addEventListener('dblclick', ()=>{
-const current = el.textContent;
-const input = document.createElement('input');
-input.type='text';input.value=current;input.style.width='100%';input.style.fontSize='inherit';
-el.replaceWith(input);input.focus();
-input.addEventListener('blur', ()=>{finish(input)});
-input.addEventListener('keydown', (e)=>{if(e.key==='Enter') finish(input)});
-function finish(inp){
-const txt = inp.value.trim()||placeholder||'—';
-const span = document.createElement('div');span.textContent=txt;span.id=el.id;span.className=el.className;
-inp.replaceWith(span);
-// reattach editable behavior
-makeEditable(span,placeholder);
-// update avatar initials if display name changed
-if(span.id==='displayName'){
-const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
-avatar.textContent = initials || '👻';
-}
-}
-});
-}
+    footer{padding:12px 18px;background:linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.6));border-top:1px solid rgba(0,0,0,0.03);font-size:12px;color:#6c6b75;text-align:center}
 
+    @media (max-width:420px){.profile-card{width:94%}}
+  </style>
+</head>
+<body>
+  <div class="profile-card" role="region" aria-label="Snapchat-style profile card">
+    <div class="profile-header">
+      <div class="snapcode" aria-hidden="true">
+        <div class="ghost">👻</div>
+      </div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-weight:800;font-size:15px;color:#2b2630">HeyHey</div>
+            <div style="font-size:12px;color:#6c6b75;margin-top:6px">Add me — tap the ghost or use my Snapcode</div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Snap Score</div>
+            <div style="font-weight:800;font-size:18px;color:#2b2630">12,345</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-makeEditable(displayName,'HeyHey');
-makeEditable(bio,'Add a bio...');
+    <div class="profile-main">
+      <div class="identity">
+        <div class="avatar" id="avatar">HH</div>
+        <div class="names">
+          <div class="display-name" id="displayName">HeyHey</div>
+          <div class="username">@<span id="username">heyhey123</span> <span class="copy-icon" id="copyBtn" title="Copy username">📋</span></div>
+          <div class="meta">
+            <div class="pill">Friends: <strong id="friendsCount">128</strong></div>
+            <div class="pill">Streak: <strong id="streak">45🔥</strong></div>
+          </div>
+        </div>
+      </div>
 
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px">
+        <div class="story-ring" title="Your story">
+          <div class="story-inner">Story</div>
+        </div>
+        <div style="flex:1;margin-left:12px">
+          <div class="bio" id="bio">This is a playful Snapchat-style profile template made with HTML/CSS/JS. Customize name, username and avatar.</div>
+          <div class="actions">
+            <button class="btn btn-primary" id="addBtn">Add Friend</button>
+            <button class="btn btn-outline" id="messageBtn">Message</button>
+          </div>
+        </div>
+      </div>
 
-// seed avatar initials
-(function(){
-const txt = displayName.textContent.trim();
-const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
-avatar.textContent = initials || 'HH';
-})();
-</script>
+      <div class="stats">
+        <div class="stat"><div class="num" id="snaps">240</div><div class="label">Snaps</div></div>
+        <div class="stat"><div class="num" id="stories">18</div><div class="label">Stories</div></div>
+        <div class="stat"><div class="num" id="score">12,345</div><div class="label">Score</div></div>
+      </div>
+
+    </div>
+
+    <footer>
+      This is a static template — export, edit, and host on GitHub Pages. Want this converted to React or to include a real Snapcode generator?
+    </footer>
+  </div>
+
+  <script>
+    // Basic interactivity — copy username, toggle friend status, small animations
+    const copyBtn = document.getElementById('copyBtn');
+    const usernameEl = document.getElementById('username');
+    const addBtn = document.getElementById('addBtn');
+    const friendsCount = document.getElementById('friendsCount');
+
+    copyBtn.addEventListener('click', async () => {
+      const text = usernameEl.textContent.trim();
+      try{
+        await navigator.clipboard.writeText('@' + text);
+        copyBtn.textContent = '✅';
+        setTimeout(()=>copyBtn.textContent='📋',1000);
+      }catch(e){
+        alert('Copy: @' + text);
+      }
+    });
+
+    let added = false;
+    addBtn.addEventListener('click', () =>{
+      added = !added;
+      if(added){
+        addBtn.textContent = 'Added';
+        addBtn.style.opacity = 0.95;
+        addBtn.classList.remove('btn-primary');
+        addBtn.classList.add('btn-outline');
+        // increment friends
+        friendsCount.textContent = String(Number(friendsCount.textContent) + 1);
+      }else{
+        addBtn.textContent = 'Add Friend';
+        addBtn.classList.remove('btn-outline');
+        addBtn.classList.add('btn-primary');
+        friendsCount.textContent = String(Math.max(0, Number(friendsCount.textContent) - 1));
+      }
+    });
+
+    // small cheeky message button
+    document.getElementById('messageBtn').addEventListener('click', ()=>{
+      alert('This is a static template. Integrate with your backend or open a chat deep-link.');
+    });
+
+    // Example: allow quick editing by double-clicking name fields
+    const displayName = document.getElementById('displayName');
+    const avatar = document.getElementById('avatar');
+    const bio = document.getElementById('bio');
+
+    function makeEditable(el, placeholder=undefined){
+      el.addEventListener('dblclick', ()=>{
+        const current = el.textContent;
+        const input = document.createElement('input');
+        input.type='text';input.value=current;input.style.width='100%';input.style.fontSize='inherit';
+        el.replaceWith(input);input.focus();
+        input.addEventListener('blur', ()=>{finish(input)});
+        input.addEventListener('keydown', (e)=>{if(e.key==='Enter') finish(input)});
+        function finish(inp){
+          const txt = inp.value.trim()||placeholder||'—';
+          const span = document.createElement('div');span.textContent=txt;span.id=el.id;span.className=el.className;
+          inp.replaceWith(span);
+          // reattach editable behavior
+          makeEditable(span,placeholder);
+          // update avatar initials if display name changed
+          if(span.id==='displayName'){
+            const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+            avatar.textContent = initials || '👻';
+          }
+        }
+      });
+    }
+
+    makeEditable(displayName,'HeyHey');
+    makeEditable(bio,'Add a bio...');
+
+    // seed avatar initials
+    (function(){
+      const txt = displayName.textContent.trim();
+      const initials = txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
+      avatar.textContent = initials || 'HH';
+    })();
+  </script>
 </body>
 </html>
