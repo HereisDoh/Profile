@@ -152,7 +152,10 @@ function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 }
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener('resize', () => {
+  resizeCanvas();
+  playerX = canvas.width / 2;
+});
 resizeCanvas();
 
 cameraIcon.addEventListener('click', async () => {
@@ -226,7 +229,7 @@ function gameLoop() {
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<50){
+      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<75){
         stars.splice(i,1);
         i--;
         score += s.points;
@@ -237,8 +240,11 @@ function gameLoop() {
       }
     }
 
+    // Draw larger, visible catcher
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
+    ctx.fillRect(playerX-75, canvas.height-40, 150, 30);
+    ctx.strokeStyle = 'white';
+    ctx.strokeRect(playerX-75, canvas.height-40, 150, 30);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
@@ -250,4 +256,4 @@ function applyFilter(filter) {
 </script>
 
 </body>
-</html>
+</
