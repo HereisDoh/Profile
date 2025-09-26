@@ -153,8 +153,10 @@ cameraIcon.addEventListener('click', () => {
     .then(stream => {
       video.srcObject = stream;
       video.play();
-      canvas.width = video.videoWidth || window.innerWidth;
-      canvas.height = video.videoHeight || window.innerHeight;
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      });
     })
     .catch(err => {
       alert('Camera access denied or not available.');
@@ -189,7 +191,7 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    if(Math.random() < 0.03) { // more frequent
+    if(Math.random() < 0.03) {
       let typeRand = Math.random();
       let type = 'normal';
       let color = 'yellow';
@@ -205,7 +207,8 @@ function gameLoop() {
         points = 3;
       }
 
-      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: color, points: points});
+      // spawn only within video width
+      stars.push({x: Math.random()*video.videoWidth, y: 0, size: 25, color: color, points: points});
     }
 
     for(let i=0;i<stars.length;i++){
@@ -227,7 +230,8 @@ function gameLoop() {
       }
     }
 
-    ctx.fillStyle = 'red';n    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
+    ctx.fillStyle = 'red';
+    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
