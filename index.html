@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snapchat Clone Front + Camera + Game Filters</title>
+<title>SnapClone Interactive Camera Games</title>
 <style>
   body {
     margin: 0;
@@ -11,7 +11,8 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #fff;
+    background: #000;
+    color: #fff;
   }
   .front-page, .camera-page {
     flex: 1;
@@ -43,24 +44,10 @@
     max-height: 100%;
     border-radius: 10px;
   }
-  .filter-bar {
+  canvas {
     position: absolute;
-    bottom: 80px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-    background: rgba(0,0,0,0.3);
-    border-radius: 10px;
-  }
-  .filter-bar button {
-    min-width: 60px;
-    padding: 8px;
-    border: none;
-    border-radius: 8px;
-    background: #fffc00;
-    font-weight: bold;
-    cursor: pointer;
+    top: 0;
+    left: 0;
   }
   .back-btn {
     position: absolute;
@@ -73,35 +60,38 @@
     font-weight: bold;
     cursor: pointer;
   }
+  .game-select {
+    position: absolute;
+    bottom: 80px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  .game-select button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: #fffc00;
+    font-weight: bold;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
 
 <div class="front-page" id="frontPage">
   <h1>Welcome to SnapClone</h1>
-  <p>Click the camera below to start taking snaps!</p>
+  <p>Click the camera below to start playing interactive games!</p>
 </div>
 
 <div class="camera-page" id="cameraPage" style="display:none;">
   <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
-  <div class="filter-bar" id="filterBar">
-    <!-- Classic Filters -->
-    <button onclick="applyFilter('none')">Normal</button>
-    <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
-    <button onclick="applyFilter('sepia(100%)')">Sepia</button>
-    <button onclick="applyFilter('blur(5px)')">Blur</button>
-    <button onclick="applyFilter('invert(100%)')">Invert</button>
-    <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
-    <button onclick="applyFilter('contrast(150%)')">Contrast</button>
-    <button onclick="applyFilter('saturate(200%)')">Saturate</button>
-    <!-- Game Filters -->
-    <button onclick="applyFilter('brightness(150%) sepia(50%)')">Retro Game</button>
-    <button onclick="applyFilter('hue-rotate(180deg) contrast(120%)')">Neon Glow</button>
-    <button onclick="applyFilter('invert(50%) saturate(300%)')">Arcade</button>
-    <button onclick="applyFilter('sepia(60%) contrast(140%) hue-rotate(50deg)')">Pixel Adventure</button>
-    <button onclick="applyFilter('invert(70%) hue-rotate(270deg) brightness(120%)')">Space Quest</button>
-    <button onclick="applyFilter('contrast(180%) saturate(200%) hue-rotate(120deg)')">Monster Battle</button>
+  <canvas id="gameCanvas"></canvas>
+  <div class="game-select" id="gameSelect">
+    <button onclick="startGame('catch')">Catch Stars</button>
+    <button onclick="startGame('dodge')">Space Dodger</button>
   </div>
 </div>
 
@@ -118,6 +108,10 @@ const cameraPage = document.getElementById('cameraPage');
 const cameraIcon = document.getElementById('cameraIcon');
 const video = document.getElementById('camera');
 const backBtn = document.getElementById('backBtn');
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let currentGame = null;
+let animationFrameId;
 
 cameraIcon.addEventListener('click', () => {
   frontPage.style.display = 'none';
@@ -126,6 +120,9 @@ cameraIcon.addEventListener('click', () => {
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
+      video.play();
+      canvas.width = video.videoWidth || window.innerWidth;
+      canvas.height = video.videoHeight || window.innerHeight;
     })
     .catch(err => {
       alert('Camera access denied or not available.');
@@ -138,10 +135,52 @@ backBtn.addEventListener('click', () => {
   let tracks = video.srcObject ? video.srcObject.getTracks() : [];
   tracks.forEach(track => track.stop());
   video.srcObject = null;
+  cancelAnimationFrame(animationFrameId);
 });
 
-function applyFilter(filter) {
-  video.style.filter = filter;
+function startGame(game) {
+  currentGame = game;
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+// Simple game state
+let stars = [];
+let playerX = 0;
+
+canvas.addEventListener('mousemove', (e) => {
+  playerX = e.offsetX;
+});
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if(currentGame === 'catch') {
+    // spawn stars randomly
+    if(Math.random() < 0.02) {
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
+    }
+    // draw stars
+    for(let i=0;i<stars.length;i++){
+      let s = stars[i];
+      s.y += 4;
+      ctx.fillStyle = 'yellow';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
+      ctx.fill();
+      // check if caught
+      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<30){
+        stars.splice(i,1);
+        i--;
+      } else if(s.y > canvas.height){
+        stars.splice(i,1);
+        i--;
+      }
+    }
+    // draw player
+    ctx.fillStyle = 'red';
+    ctx.fillRect(playerX-25, canvas.height-20, 50, 10);
+  }
+  // Other games can be added here
+  animationFrameId = requestAnimationFrame(gameLoop);
 }
 </script>
 
