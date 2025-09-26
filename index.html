@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snapchat Clone Front + Camera</title>
+<title>Snapchat Clone Front + Camera + Filters</title>
 <style>
   body {
     margin: 0;
@@ -62,6 +62,17 @@
     font-weight: bold;
     cursor: pointer;
   }
+  .back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 8px 12px;
+    background: #fffc00;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -72,6 +83,7 @@
 </div>
 
 <div class="camera-page" id="cameraPage" style="display:none;">
+  <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
   <div class="filter-bar" id="filterBar">
     <button onclick="applyFilter('none')">Normal</button>
@@ -82,6 +94,10 @@
     <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
     <button onclick="applyFilter('contrast(150%)')">Contrast</button>
     <button onclick="applyFilter('saturate(200%)')">Saturate</button>
+    <!-- Game filters -->
+    <button onclick="applyFilter('brightness(150%) sepia(50%)')">Retro Game</button>
+    <button onclick="applyFilter('hue-rotate(180deg) contrast(120%)')">Neon Glow</button>
+    <button onclick="applyFilter('invert(50%) saturate(300%)')">Arcade</button>
   </div>
 </div>
 
@@ -97,12 +113,12 @@ const frontPage = document.getElementById('frontPage');
 const cameraPage = document.getElementById('cameraPage');
 const cameraIcon = document.getElementById('cameraIcon');
 const video = document.getElementById('camera');
+const backBtn = document.getElementById('backBtn');
 
 cameraIcon.addEventListener('click', () => {
   frontPage.style.display = 'none';
   cameraPage.style.display = 'flex';
 
-  // Access webcam
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => {
       video.srcObject = stream;
@@ -110,6 +126,14 @@ cameraIcon.addEventListener('click', () => {
     .catch(err => {
       alert('Camera access denied or not available.');
     });
+});
+
+backBtn.addEventListener('click', () => {
+  cameraPage.style.display = 'none';
+  frontPage.style.display = 'flex';
+  let tracks = video.srcObject ? video.srcObject.getTracks() : [];
+  tracks.forEach(track => track.stop());
+  video.srcObject = null;
 });
 
 function applyFilter(filter) {
