@@ -145,22 +145,19 @@ let stars = [];
 let playerX = 0;
 let score = 0;
 
-cameraIcon.addEventListener('click', () => {
+cameraIcon.addEventListener('click', async () => {
   frontPage.style.display = 'none';
   cameraPage.style.display = 'flex';
 
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      video.srcObject = stream;
-      video.play();
-      video.addEventListener('loadedmetadata', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-      });
-    })
-    .catch(err => {
-      alert('Camera access denied or not available.');
-    });
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    await video.play();
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+  } catch (err) {
+    alert('Camera access denied or not available.');
+  }
 });
 
 homeIcon.addEventListener('click', () => {
@@ -207,7 +204,6 @@ function gameLoop() {
         points = 3;
       }
 
-      // spawn only within video width
       stars.push({x: Math.random()*video.videoWidth, y: 0, size: 25, color: color, points: points});
     }
 
