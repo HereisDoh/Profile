@@ -50,17 +50,6 @@
     top: 0;
     left: 0;
   }
-  .back-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 8px 12px;
-    background: #fffc00;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-  }
   .game-select {
     position: absolute;
     bottom: 100px;
@@ -79,7 +68,7 @@
   }
   .filter-select {
     position: absolute;
-    bottom: 40px;
+    bottom: 50px;
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -113,7 +102,6 @@
 </div>
 
 <div class="camera-page" id="cameraPage" style="display:none;">
-  <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
   <canvas id="gameCanvas"></canvas>
   <div class="score-display" id="scoreDisplay">Score: 0</div>
@@ -135,7 +123,7 @@
 
 <nav>
   <span id="cameraIcon">📷</span>
-  <span>👥</span>
+  <span id="homeIcon">🏠</span>
   <span>💬</span>
   <span>⭐</span>
 </nav>
@@ -144,8 +132,8 @@
 const frontPage = document.getElementById('frontPage');
 const cameraPage = document.getElementById('cameraPage');
 const cameraIcon = document.getElementById('cameraIcon');
+const homeIcon = document.getElementById('homeIcon');
 const video = document.getElementById('camera');
-const backBtn = document.getElementById('backBtn');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('scoreDisplay');
@@ -172,7 +160,7 @@ cameraIcon.addEventListener('click', () => {
     });
 });
 
-backBtn.addEventListener('click', () => {
+homeIcon.addEventListener('click', () => {
   cameraPage.style.display = 'none';
   frontPage.style.display = 'flex';
   let tracks = video.srcObject ? video.srcObject.getTracks() : [];
@@ -192,6 +180,7 @@ function startGame(game) {
   currentGame = game;
   stars = [];
   score = 0;
+  scoreDisplay.textContent = 'Score: 0';
   animationFrameId = requestAnimationFrame(gameLoop);
 }
 
@@ -199,21 +188,19 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    // slower star spawn
     if(Math.random() < 0.01) {
       stars.push({x: Math.random()*canvas.width, y: 0, size: 25});
     }
 
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
-      s.y += 2; // slower
+      s.y += 2;
       ctx.fillStyle = 'yellow';
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      // check if caught
-      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<50){ // bigger catcher
+      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<50){
         stars.splice(i,1);
         i--;
         score += 1;
@@ -224,9 +211,8 @@ function gameLoop() {
       }
     }
 
-    // draw catcher
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-50, canvas.height-30, 100, 20); // bigger catcher
+    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
