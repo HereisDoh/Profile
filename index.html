@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SnapClone Interactive Camera Games</title>
+<title>SnapClone Interactive Camera Games + Filters</title>
 <style>
   body {
     margin: 0;
@@ -43,6 +43,7 @@
     width: 100%;
     max-height: 100%;
     border-radius: 10px;
+    filter: none;
   }
   canvas {
     position: absolute;
@@ -62,7 +63,7 @@
   }
   .game-select {
     position: absolute;
-    bottom: 80px;
+    bottom: 100px;
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -75,6 +76,32 @@
     background: #fffc00;
     font-weight: bold;
     cursor: pointer;
+  }
+  .filter-select {
+    position: absolute;
+    bottom: 40px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 10px;
+  }
+  .filter-select button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 8px;
+    background: #fffc00;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .score-display {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(0,0,0,0.5);
+    padding: 5px 10px;
+    border-radius: 8px;
   }
 </style>
 </head>
@@ -89,9 +116,20 @@
   <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
   <canvas id="gameCanvas"></canvas>
+  <div class="score-display" id="scoreDisplay">Score: 0</div>
+
   <div class="game-select" id="gameSelect">
     <button onclick="startGame('catch')">Catch Stars</button>
-    <button onclick="startGame('dodge')">Space Dodger</button>
+  </div>
+  <div class="filter-select" id="filterSelect">
+    <button onclick="applyFilter('none')">Normal</button>
+    <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+    <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+    <button onclick="applyFilter('blur(5px)')">Blur</button>
+    <button onclick="applyFilter('invert(100%)')">Invert</button>
+    <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
+    <button onclick="applyFilter('contrast(150%)')">Contrast</button>
+    <button onclick="applyFilter('saturate(200%)')">Saturate</button>
   </div>
 </div>
 
@@ -110,8 +148,13 @@ const video = document.getElementById('camera');
 const backBtn = document.getElementById('backBtn');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const scoreDisplay = document.getElementById('scoreDisplay');
+
 let currentGame = null;
 let animationFrameId;
+let stars = [];
+let playerX = 0;
+let score = 0;
 
 cameraIcon.addEventListener('click', () => {
   frontPage.style.display = 'none';
@@ -136,51 +179,61 @@ backBtn.addEventListener('click', () => {
   tracks.forEach(track => track.stop());
   video.srcObject = null;
   cancelAnimationFrame(animationFrameId);
+  stars = [];
+  score = 0;
+  scoreDisplay.textContent = 'Score: 0';
 });
-
-function startGame(game) {
-  currentGame = game;
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-
-// Simple game state
-let stars = [];
-let playerX = 0;
 
 canvas.addEventListener('mousemove', (e) => {
   playerX = e.offsetX;
 });
 
+function startGame(game) {
+  currentGame = game;
+  stars = [];
+  score = 0;
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
+
 function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   if(currentGame === 'catch') {
-    // spawn stars randomly
-    if(Math.random() < 0.02) {
-      stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
+    // slower star spawn
+    if(Math.random() < 0.01) {
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 25});
     }
-    // draw stars
+
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
-      s.y += 4;
+      s.y += 2; // slower
       ctx.fillStyle = 'yellow';
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
+
       // check if caught
-      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<30){
+      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<50){ // bigger catcher
         stars.splice(i,1);
         i--;
+        score += 1;
+        scoreDisplay.textContent = 'Score: '+score;
       } else if(s.y > canvas.height){
         stars.splice(i,1);
         i--;
       }
     }
-    // draw player
+
+    // draw catcher
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-25, canvas.height-20, 50, 10);
+    ctx.fillRect(playerX-50, canvas.height-30, 100, 20); // bigger catcher
   }
-  // Other games can be added here
+
   animationFrameId = requestAnimationFrame(gameLoop);
+}
+
+function applyFilter(filter) {
+  video.style.filter = filter;
 }
 </script>
 
