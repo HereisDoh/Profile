@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snapchat Clone Front + Camera + Filters</title>
+<title>Snapchat Clone Front + Camera + Game Filters</title>
 <style>
   body {
     margin: 0;
@@ -86,6 +86,7 @@
   <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
   <div class="filter-bar" id="filterBar">
+    <!-- Classic Filters -->
     <button onclick="applyFilter('none')">Normal</button>
     <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
     <button onclick="applyFilter('sepia(100%)')">Sepia</button>
@@ -94,10 +95,13 @@
     <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
     <button onclick="applyFilter('contrast(150%)')">Contrast</button>
     <button onclick="applyFilter('saturate(200%)')">Saturate</button>
-    <!-- Game filters -->
+    <!-- Game Filters -->
     <button onclick="applyFilter('brightness(150%) sepia(50%)')">Retro Game</button>
     <button onclick="applyFilter('hue-rotate(180deg) contrast(120%)')">Neon Glow</button>
     <button onclick="applyFilter('invert(50%) saturate(300%)')">Arcade</button>
+    <button onclick="applyFilter('sepia(60%) contrast(140%) hue-rotate(50deg)')">Pixel Adventure</button>
+    <button onclick="applyFilter('invert(70%) hue-rotate(270deg) brightness(120%)')">Space Quest</button>
+    <button onclick="applyFilter('contrast(180%) saturate(200%) hue-rotate(120deg)')">Monster Battle</button>
   </div>
 </div>
 
