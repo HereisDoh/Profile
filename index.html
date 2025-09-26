@@ -1,164 +1,126 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snapchat Profile Clone</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    html,body{height:100%;width:100%;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial;background:#fff}
-
-    body{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
-
-    .topbar{background:#fffc00;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-weight:700;color:#000;box-shadow:0 1px 2px rgba(0,0,0,0.1);}
-    .topbar .title{font-size:18px}
-    .topbar .icon{font-size:20px;cursor:pointer}
-
-    .content{flex:1;overflow-y:auto;background:#f9f9f9;padding:16px;}
-
-    .profile-header{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
-    .avatar{width:80px;height:80px;border-radius:20px;background:#fffc00;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#000;box-shadow:0 4px 12px rgba(0,0,0,0.1);}
-    .names{flex:1}
-    .display-name{font-size:20px;font-weight:700;color:#000}
-    .username{color:#444;font-size:14px;margin-top:4px}
-
-    .stats{display:flex;justify-content:space-around;margin:20px 0}
-    .stat{text-align:center}
-    .stat .num{font-weight:700;font-size:18px;color:#000}
-    .stat .label{font-size:12px;color:#555}
-
-    .actions{display:flex;gap:10px;margin-bottom:20px}
-    .btn{flex:1;padding:12px;border-radius:12px;border:0;font-weight:700;font-size:15px;cursor:pointer}
-    .btn-primary{background:#fffc00;color:#000}
-    .btn-outline{background:#fff;border:1px solid #ccc;color:#000}
-
-    .bio{background:#fff;padding:16px;border-radius:16px;font-size:14px;color:#333;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
-
-    .footer{height:56px;display:flex;justify-content:space-around;align-items:center;background:#fff;border-top:1px solid #ddd;}
-    .footer .icon{font-size:20px;cursor:pointer;color:#444}
-
-    /* Filter modal */
-    .filter-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:1000;}
-    .filter-box{background:#fff;padding:20px;border-radius:16px;width:90%;max-width:400px;text-align:center;}
-    .filter-options{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px;}
-    .filter-option{flex:1 0 30%;background:#fffc00;padding:12px;border-radius:12px;cursor:pointer;font-weight:600;color:#000}
-    .close-btn{margin-top:20px;padding:10px 16px;background:#eee;border:none;border-radius:12px;cursor:pointer;font-weight:600}
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+    header {
+      background-color: #fffc00;
+      color: #000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      font-weight: bold;
+    }
+    header button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      position: relative;
+    }
+    video {
+      max-width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+    }
+    .filter-popup {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #fff;
+      color: #000;
+      padding: 15px;
+      border-radius: 10px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10;
+    }
+    .filter-popup button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #fffc00;
+      color: #000;
+      font-weight: bold;
+    }
+    nav {
+      background: #111;
+      color: #fff;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 0;
+    }
   </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="icon">👤</div>
-    <div class="title">Profile</div>
-    <div class="icon">⚙️</div>
-  </div>
-
-  <div class="content">
-    <div class="profile-header">
-      <div class="avatar" id="avatar">HH</div>
-      <div class="names">
-        <div class="display-name" id="displayName">HeyHey</div>
-        <div class="username">@<span id="username">heyhey123</span> <span id="copyBtn" title="Copy username">📋</span></div>
-      </div>
+  <header>
+    <span>👻 Snapchat</span>
+    <button id="filterBtn">✨</button>
+  </header>
+  <main>
+    <video id="camera" autoplay playsinline></video>
+    <div class="filter-popup" id="filterPopup">
+      <button onclick="applyFilter('none')">Normal</button>
+      <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+      <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+      <button onclick="applyFilter('blur(5px)')">Blur</button>
     </div>
-
-    <div class="stats">
-      <div class="stat"><div class="num" id="friendsCount">128</div><div class="label">Friends</div></div>
-      <div class="stat"><div class="num" id="streak">45🔥</div><div class="label">Streak</div></div>
-      <div class="stat"><div class="num" id="score">12,345</div><div class="label">Score</div></div>
-    </div>
-
-    <div class="actions">
-      <button class="btn btn-primary" id="addBtn">Add Friend</button>
-      <button class="btn btn-outline" id="messageBtn">Message</button>
-    </div>
-
-    <div class="bio" id="bio">This is a Snapchat-style profile clone. Tap name or bio to edit.</div>
-
-    <div style="margin-top:20px;text-align:center">
-      <button class="btn btn-primary" id="filterBtn">Try Filters</button>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="icon">📷</div>
-    <div class="icon">💬</div>
-    <div class="icon">👻</div>
-    <div class="icon">⭐</div>
-  </div>
-
-  <!-- Filter Modal -->
-  <div class="filter-modal" id="filterModal">
-    <div class="filter-box">
-      <h3>Choose a Filter</h3>
-      <div class="filter-options">
-        <div class="filter-option" onclick="alert('Dog filter applied! 🐶')">Dog</div>
-        <div class="filter-option" onclick="alert('Rainbow filter applied! 🌈')">Rainbow</div>
-        <div class="filter-option" onclick="alert('Glasses filter applied! 🤓')">Glasses</div>
-      </div>
-      <button class="close-btn" id="closeFilter">Close</button>
-    </div>
-  </div>
+  </main>
+  <nav>
+    <span>📸 Camera</span>
+    <span>👥 Friends</span>
+    <span>💬 Chat</span>
+    <span>⭐ Spotlight</span>
+  </nav>
 
   <script>
-    const copyBtn=document.getElementById('copyBtn');
-    const usernameEl=document.getElementById('username');
-    copyBtn.addEventListener('click',async()=>{
-      const text=usernameEl.textContent.trim();
-      try{await navigator.clipboard.writeText('@'+text);copyBtn.textContent='✅';setTimeout(()=>copyBtn.textContent='📋',1000);}catch(e){alert('Copy: @'+text);}
-    });
+    const video = document.getElementById('camera');
+    const filterBtn = document.getElementById('filterBtn');
+    const filterPopup = document.getElementById('filterPopup');
 
-    const addBtn=document.getElementById('addBtn');
-    const friendsCount=document.getElementById('friendsCount');
-    let added=false;
-    addBtn.addEventListener('click',()=>{
-      added=!added;
-      if(added){addBtn.textContent='Added';addBtn.classList.remove('btn-primary');addBtn.classList.add('btn-outline');friendsCount.textContent=String(Number(friendsCount.textContent)+1);}else{addBtn.textContent='Add Friend';addBtn.classList.remove('btn-outline');addBtn.classList.add('btn-primary');friendsCount.textContent=String(Math.max(0,Number(friendsCount.textContent)-1));}
-    });
-
-    document.getElementById('messageBtn').addEventListener('click',()=>{alert('Messaging is not implemented in this static clone.');});
-
-    function makeEditable(el,placeholder){
-      el.addEventListener('dblclick',()=>{
-        const current=el.textContent;
-        const input=document.createElement('input');
-        input.type='text';input.value=current;input.style.width='100%';
-        el.replaceWith(input);input.focus();
-        input.addEventListener('blur',()=>finish(input));
-        input.addEventListener('keydown',e=>{if(e.key==='Enter')finish(input)});
-        function finish(inp){
-          const txt=inp.value.trim()||placeholder||'—';
-          const div=document.createElement('div');div.textContent=txt;div.id=el.id;div.className=el.className;
-          inp.replaceWith(div);
-          makeEditable(div,placeholder);
-          if(div.id==='displayName'){
-            const initials=txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
-            document.getElementById('avatar').textContent=initials||'👻';
-          }
-        }
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert('Camera access denied or not available.');
       });
+
+    // Toggle popup
+    filterBtn.addEventListener('click', () => {
+      filterPopup.style.display =
+        filterPopup.style.display === 'flex' ? 'none' : 'flex';
+    });
+
+    // Apply filter
+    function applyFilter(filter) {
+      video.style.filter = filter;
     }
-
-    makeEditable(document.getElementById('displayName'),'Name');
-    makeEditable(document.getElementById('bio'),'Add a bio...');
-
-    const txt=document.getElementById('displayName').textContent.trim();
-    const initials=txt.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase();
-    document.getElementById('avatar').textContent=initials||'👻';
-
-    // Filters modal logic
-    const filterBtn=document.getElementById('filterBtn');
-    const filterModal=document.getElementById('filterModal');
-    const closeFilter=document.getElementById('closeFilter');
-
-    filterBtn.addEventListener('click',()=>{
-      filterModal.style.display='flex';
-    });
-    closeFilter.addEventListener('click',()=>{
-      filterModal.style.display='none';
-    });
-    filterModal.addEventListener('click',(e)=>{
-      if(e.target===filterModal){filterModal.style.display='none';}
-    });
   </script>
 </body>
 </html>
