@@ -155,9 +155,11 @@ cameraIcon.addEventListener('click', async () => {
     video.srcObject = stream;
     await video.play();
 
-    // Set canvas size after video metadata is loaded
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+
+    // Initialize catcher in center
+    playerX = canvas.width / 2;
   } catch (err) {
     alert('Camera access denied or not available.');
   }
@@ -176,7 +178,8 @@ homeIcon.addEventListener('click', () => {
 });
 
 canvas.addEventListener('mousemove', (e) => {
-  playerX = e.offsetX;
+  const rect = canvas.getBoundingClientRect();
+  playerX = e.clientX - rect.left;
 });
 
 function startGame(game) {
@@ -207,7 +210,7 @@ function gameLoop() {
         points = 3;
       }
 
-      stars.push({x: Math.random()*video.videoWidth, y: 0, size: 25, color: color, points: points});
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: color, points: points});
     }
 
     for(let i=0;i<stars.length;i++){
