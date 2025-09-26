@@ -50,6 +50,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    pointer-events: none; /* allow clicks through canvas */
   }
   .game-select {
     position: absolute;
@@ -153,6 +154,8 @@ cameraIcon.addEventListener('click', async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true });
     video.srcObject = stream;
     await video.play();
+
+    // Set canvas size after video metadata is loaded
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
   } catch (err) {
