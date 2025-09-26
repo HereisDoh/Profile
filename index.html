@@ -44,6 +44,7 @@
     max-height: 100%;
     border-radius: 10px;
     filter: none;
+    display: block;
   }
   canvas {
     position: absolute;
@@ -188,22 +189,37 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    if(Math.random() < 0.01) {
-      stars.push({x: Math.random()*canvas.width, y: 0, size: 25});
+    if(Math.random() < 0.03) { // more frequent
+      let typeRand = Math.random();
+      let type = 'normal';
+      let color = 'yellow';
+      let points = 1;
+
+      if(typeRand < 0.1){
+        type = 'negative';
+        color = 'orange';
+        points = -2;
+      } else if(typeRand < 0.25){
+        type = 'bonus';
+        color = 'green';
+        points = 3;
+      }
+
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: color, points: points});
     }
 
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
       s.y += 2;
-      ctx.fillStyle = 'yellow';
+      ctx.fillStyle = s.color;
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<50){
+      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<50){
         stars.splice(i,1);
         i--;
-        score += 1;
+        score += s.points;
         scoreDisplay.textContent = 'Score: '+score;
       } else if(s.y > canvas.height){
         stars.splice(i,1);
@@ -211,8 +227,7 @@ function gameLoop() {
       }
     }
 
-    ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
+    ctx.fillStyle = 'red';n    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
