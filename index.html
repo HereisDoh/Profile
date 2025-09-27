@@ -1,248 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SnapClone Interactive Camera Games + Filters</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #000;
-    color: #fff;
-  }
-  .front-page, .camera-page {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-  .front-page h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
-  nav {
-    height: 60px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #fffc00;
-  }
-  nav span {
-    font-size: 24px;
-    cursor: pointer;
-  }
-  video {
-    width: 100%;
-    max-height: 100%;
-    border-radius: 10px;
-    filter: none;
-    display: block;
-  }
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none; /* allow clicks through canvas */
-  }
-  .game-select {
-    position: absolute;
-    bottom: 100px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-  }
-  .game-select button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: #fffc00;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .filter-select {
-    position: absolute;
-    bottom: 50px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-  }
-  .filter-select button {
-    padding: 6px 10px;
-    border: none;
-    border-radius: 8px;
-    background: #fffc00;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .score-display {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    background: rgba(0,0,0,0.5);
-    padding: 5px 10px;
-    border-radius: 8px;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SnapClone Interactive Camera Games + Filters</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      color: #fff;
+    }
+    .front-page, .camera-page {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .front-page h1 {
+      font-size: 32px;
+      margin-bottom: 20px;
+    }
+    nav {
+      height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: #fffc00;
+    }
+    nav span {
+      font-size: 24px;
+      cursor: pointer;
+    }
+    video {
+      width: 100%;
+      max-height: 100%;
+      border-radius: 10px;
+      filter: none;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      padding: 8px 12px;
+      background: #fffc00;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .game-select {
+      position: absolute;
+      bottom: 100px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px;
+    }
+    .game-select button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      background: #fffc00;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .filter-select {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 10px;
+    }
+    .filter-select button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 8px;
+      background: #fffc00;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .score-display {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      font-weight: bold;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 <body>
 
-<div class="front-page" id="frontPage">
-  <h1>Welcome to SnapClone</h1>
-  <p>Click the camera below to start playing interactive games!</p>
-</div>
-
-<div class="camera-page" id="cameraPage" style="display:none;">
-  <video id="camera" autoplay playsinline></video>
-  <canvas id="gameCanvas"></canvas>
-  <div class="score-display" id="scoreDisplay">Score: 0</div>
-
-  <div class="game-select" id="gameSelect">
-    <button onclick="startGame('catch')">Catch Stars</button>
+  <div class="front-page" id="frontPage">
+    <h1>Welcome to SnapClone</h1>
+    <p>Click the camera below to start playing interactive games!</p>
   </div>
-  <div class="filter-select" id="filterSelect">
-    <button onclick="applyFilter('none')">Normal</button>
-    <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
-    <button onclick="applyFilter('sepia(100%)')">Sepia</button>
-    <button onclick="applyFilter('blur(5px)')">Blur</button>
-    <button onclick="applyFilter('invert(100%)')">Invert</button>
-    <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
-    <button onclick="applyFilter('contrast(150%)')">Contrast</button>
-    <button onclick="applyFilter('saturate(200%)')">Saturate</button>
-  </div>
-</div>
 
-<nav>
-  <span id="cameraIcon">📷</span>
-  <span id="homeIcon">🏠</span>
-  <span>💬</span>
-  <span>⭐</span>
-</nav>
+  <div class="camera-page" id="cameraPage" style="display:none;">
+    <button class="back-btn" id="backBtn">⬅ Back</button>
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="gameCanvas"></canvas>
+    <div class="score-display" id="scoreDisplay">Score: 0</div>
 
-<script>
-const frontPage = document.getElementById('frontPage');
-const cameraPage = document.getElementById('cameraPage');
-const cameraIcon = document.getElementById('cameraIcon');
-const homeIcon = document.getElementById('homeIcon');
-const video = document.getElementById('camera');
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('scoreDisplay');
-
-let currentGame = null;
-let animationFrameId;
-let stars = [];
-let playerX = 0;
-let score = 0;
-
-cameraIcon.addEventListener('click', async () => {
-  frontPage.style.display = 'none';
-  cameraPage.style.display = 'flex';
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    await video.play();
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Initialize catcher in center
-    playerX = canvas.width / 2;
-  } catch (err) {
-    alert('Camera access denied or not available.');
-  }
-});
-
-homeIcon.addEventListener('click', () => {
-  cameraPage.style.display = 'none';
-  frontPage.style.display = 'flex';
-  let tracks = video.srcObject ? video.srcObject.getTracks() : [];
-  tracks.forEach(track => track.stop());
-  video.srcObject = null;
-  cancelAnimationFrame(animationFrameId);
-  stars = [];
-  score = 0;
-  scoreDisplay.textContent = 'Score: 0';
-});
-
-canvas.addEventListener('mousemove', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  playerX = e.clientX - rect.left;
-});
-
-function startGame(game) {
-  currentGame = game;
-  stars = [];
-  score = 0;
-  scoreDisplay.textContent = 'Score: 0';
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if(currentGame === 'catch') {
-    if(Math.random() < 0.03) {
-      let typeRand = Math.random();
-      let type = 'normal';
-      let color = 'yellow';
-      let points = 1;
-
-      if(typeRand < 0.1){
-        type = 'negative';
-        color = 'orange';
-        points = -2;
-      } else if(typeRand < 0.25){
-        type = 'bonus';
-        color = 'green';
-        points = 3;
-      }
-
-      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: color, points: points});
-    }
-
-    for(let i=0;i<stars.length;i++){
-      let s = stars[i];
-      s.y += 2;
-      ctx.fillStyle = s.color;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
-      ctx.fill();
-
-      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<50){
-        stars.splice(i,1);
-        i--;
-        score += s.points;
-        scoreDisplay.textContent = 'Score: '+score;
-      } else if(s.y > canvas.height){
-        stars.splice(i,1);
-        i--;
-      }
-    }
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
-  }
-
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-
-function applyFilter(filter) {
-  video.style.filter = filter;
-}
-</script>
-
-</body>
-</html>
+    <div class="game-select" id="gameSelect">
+      <button onclick="startGame('catch')">Catch Stars</button>
+    </div>
+    <div class="filter-select" id="filterSelect">
+      <button onclick="applyFilter('none')">Normal</button>
+      <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+      <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+      <button onclick="applyFilter('blur(5px)')">Blur</button>
+      <button onclick="applyFilter('invert(100%
