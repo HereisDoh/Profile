@@ -1,253 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SnapClone Interactive Camera Games + Filters</title>
-<style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #000;
-    overflow: hidden;
-  }
-  .front-page, .camera-page {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-    color: #fff;
-  }
-  .front-page h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
-  nav {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background: #fffc00;
-    z-index: 10;
-  }
-  nav span {
-    font-size: 24px;
-    cursor: pointer;
-  }
-  video {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-    z-index: 1;
-  }
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 5; /* catcher on top */
-    pointer-events: auto;
-  }
-  .game-select, .filter-select, .score-display {
-    position: absolute;
-    z-index: 6;
-  }
-  .game-select {
-    bottom: 120px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-  }
-  .game-select button, .filter-select button {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: #fffc00;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .filter-select {
-    bottom: 60px;
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 10px;
-  }
-  .score-display {
-    top: 20px;
-    right: 20px;
-    font-size: 24px;
-    font-weight: bold;
-    background: rgba(0,0,0,0.5);
-    padding: 5px 10px;
-    border-radius: 8px;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SnapClone</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: black;
+      font-family: Arial, sans-serif;
+    }
+    #frontPage, #cameraPage {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #FFFC00;
+    }
+    #cameraPage { display: none; background: black; }
+    video {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    #gameCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+    }
+    #bottomNav {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%; height: 60px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+      z-index: 3;
+    }
+    #bottomNav button {
+      background: none;
+      border: none;
+      font-size: 28px;
+      color: white;
+      cursor: pointer;
+    }
+    #scoreDisplay {
+      position: absolute;
+      top: 10px; right: 15px;
+      color: white;
+      font-size: 22px;
+      font-weight: bold;
+      z-index: 3;
+    }
+  </style>
 </head>
 <body>
-
-<div class="front-page" id="frontPage">
-  <h1>Welcome to SnapClone</h1>
-  <p>Click the camera below to start playing interactive games!</p>
-</div>
-
-<div class="camera-page" id="cameraPage" style="display:none;">
-  <video id="camera" autoplay playsinline></video>
-  <canvas id="gameCanvas"></canvas>
-  <div class="score-display" id="scoreDisplay">Score: 0</div>
-
-  <div class="game-select" id="gameSelect">
-    <button onclick="startGame('catch')">Catch Stars</button>
+  <!-- Front Page -->
+  <div id="frontPage">
+    <h1>👻 SnapClone</h1>
+    <button id="cameraBtn">📷 Open Camera</button>
   </div>
-  <div class="filter-select" id="filterSelect">
-    <button onclick="applyFilter('none')">Normal</button>
-    <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
-    <button onclick="applyFilter('sepia(100%)')">Sepia</button>
-    <button onclick="applyFilter('blur(5px)')">Blur</button>
-    <button onclick="applyFilter('invert(100%)')">Invert</button>
-    <button onclick="applyFilter('hue-rotate(90deg)')">Hue</button>
-    <button onclick="applyFilter('contrast(150%)')">Contrast</button>
-    <button onclick="applyFilter('saturate(200%)')">Saturate</button>
+
+  <!-- Camera Page -->
+  <div id="cameraPage">
+    <video id="camera" autoplay playsinline></video>
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreDisplay">Score: 0</div>
+    <div id="bottomNav">
+      <button id="homeBtn">🏠</button>
+      <button id="gameBtn">⭐</button>
+    </div>
   </div>
-</div>
 
-<nav>
-  <span id="cameraIcon">📷</span>
-  <span id="homeIcon">🏠</span>
-  <span>💬</span>
-  <span>⭐</span>
-</nav>
+  <script>
+    const frontPage = document.getElementById("frontPage");
+    const cameraPage = document.getElementById("cameraPage");
+    const cameraBtn = document.getElementById("cameraBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const gameBtn = document.getElementById("gameBtn");
+    const video = document.getElementById("camera");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreDisplay = document.getElementById("scoreDisplay");
 
-<script>
-const frontPage = document.getElementById('frontPage');
-const cameraPage = document.getElementById('cameraPage');
-const cameraIcon = document.getElementById('cameraIcon');
-const homeIcon = document.getElementById('homeIcon');
-const video = document.getElementById('camera');
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const scoreDisplay = document.getElementById('scoreDisplay');
+    let currentGame = null;
+    let animationFrameId;
+    let stars = [];
+    let score = 0;
+    let playerX = 0;
+    let catcherWidth = 150;
+    let catcherHeight = 30;
 
-let currentGame = null;
-let animationFrameId;
-let stars = [];
-let score = 0;
-let playerX;
-let catcherWidth = 150;
-let catcherHeight = 30;
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  playerX = canvas.width / 2;
-}
-window.addEventListener('resize', resizeCanvas);
-resizeCanvas();
-
-canvas.style.pointerEvents = "auto";
-
-cameraIcon.addEventListener('click', async () => {
-  frontPage.style.display = 'none';
-  cameraPage.style.display = 'flex';
-
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    video.srcObject = stream;
-    await video.play();
-    resizeCanvas();
-  } catch (err) {
-    alert('Camera access denied or not available.');
-  }
-});
-
-homeIcon.addEventListener('click', () => {
-  cameraPage.style.display = 'none';
-  frontPage.style.display = 'flex';
-  let tracks = video.srcObject ? video.srcObject.getTracks() : [];
-  tracks.forEach(track => track.stop());
-  video.srcObject = null;
-  cancelAnimationFrame(animationFrameId);
-  stars = [];
-  score = 0;
-  scoreDisplay.textContent = 'Score: 0';
-});
-
-canvas.addEventListener('mousemove', (e) => {
-  const rect = canvas.getBoundingClientRect();
-  playerX = e.clientX - rect.left;
-});
-
-function startGame(game) {
-  currentGame = game;
-  stars = [];
-  score = 0;
-  scoreDisplay.textContent = 'Score: 0';
-  playerX = canvas.width / 2;
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
-
-function gameLoop() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  if (currentGame === 'catch') {
-    if (Math.random() < 0.03) {
-      let typeRand = Math.random();
-      let type = 'normal';
-      let color = 'yellow';
-      let points = 1;
-      if (typeRand < 0.1) { type = 'negative'; color = 'orange'; points = -2; }
-      else if (typeRand < 0.25) { type = 'bonus'; color = 'green'; points = 3; }
-      stars.push({x: Math.random() * canvas.width, y: 0, size: 25, color: color, points: points});
+    // Resize canvas to video
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     }
+    window.addEventListener("resize", resizeCanvas);
 
-    for (let i = 0; i < stars.length; i++) {
-      let s = stars[i];
-      s.y += 2;
-      ctx.fillStyle = s.color;
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-      ctx.fill();
+    // Open camera
+    cameraBtn.addEventListener("click", async () => {
+      frontPage.style.display = "none";
+      cameraPage.style.display = "block";
+      resizeCanvas();
+      playerX = canvas.width / 2;
 
-      if (s.y > canvas.height - catcherHeight - 10 && Math.abs(s.x - playerX) < catcherWidth / 2) {
-        stars.splice(i, 1);
-        i--;
-        score += s.points;
-        scoreDisplay.textContent = 'Score: ' + score;
-      } else if (s.y > canvas.height) {
-        stars.splice(i, 1);
-        i--;
+      try {
+        let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) {
+        alert("Camera access denied: " + err);
       }
+    });
+
+    // Home button
+    homeBtn.addEventListener("click", () => {
+      cameraPage.style.display = "none";
+      frontPage.style.display = "flex";
+      cancelAnimationFrame(animationFrameId);
+    });
+
+    // Start game
+    gameBtn.addEventListener("click", () => {
+      currentGame = "catch";
+      startGame();
+    });
+
+    // Mouse controls
+    canvas.style.pointerEvents = "auto";
+    canvas.addEventListener("mousemove", (e) => {
+      const rect = canvas.getBoundingClientRect();
+      playerX = e.clientX - rect.left;
+    });
+
+    function startGame() {
+      stars = [];
+      score = 0;
+      scoreDisplay.textContent = "Score: 0";
+      playerX = canvas.width / 2;
+      cancelAnimationFrame(animationFrameId);
+      gameLoop();
     }
 
-    // catcher visible on top
-    ctx.fillStyle = 'red';
-    ctx.fillRect(playerX - catcherWidth / 2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 3;
-    ctx.strokeRect(playerX - catcherWidth / 2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
-  }
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  animationFrameId = requestAnimationFrame(gameLoop);
-}
+      if (currentGame === "catch") {
+        // spawn stars
+        if (Math.random() < 0.04) {
+          let typeRand = Math.random();
+          let color = "yellow";
+          let points = 1;
+          if (typeRand < 0.1) {
+            color = "orange"; points = -2;
+          } else if (typeRand < 0.25) {
+            color = "green"; points = 3;
+          }
+          stars.push({ x: Math.random() * canvas.width, y: 0, size: 20, color, points });
+        }
 
-function applyFilter(filter) {
-  video.style.filter = filter;
-}
-</script>
+        // draw + update stars
+        for (let i = 0; i < stars.length; i++) {
+          let s = stars[i];
+          s.y += 2;
+          ctx.fillStyle = s.color;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+          ctx.fill();
 
+          // collision
+          if (
+            s.y > canvas.height - catcherHeight - 10 &&
+            s.x > playerX - catcherWidth / 2 &&
+            s.x < playerX + catcherWidth / 2
+          ) {
+            stars.splice(i, 1);
+            i--;
+            score += s.points;
+            scoreDisplay.textContent = "Score: " + score;
+          } else if (s.y > canvas.height) {
+            stars.splice(i, 1);
+            i--;
+          }
+        }
+
+        // draw catcher
+        ctx.fillStyle = "red";
+        ctx.fillRect(
+          playerX - catcherWidth / 2,
+          canvas.height - catcherHeight - 10,
+          catcherWidth,
+          catcherHeight
+        );
+        ctx.strokeStyle = "white";
+        ctx.strokeRect(
+          playerX - catcherWidth / 2,
+          canvas.height - catcherHeight - 10,
+          catcherWidth,
+          catcherHeight
+        );
+      }
+
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  </script>
 </body>
 </html>
