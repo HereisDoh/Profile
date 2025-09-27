@@ -49,7 +49,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 5;
+    z-index: 5; /* ensure catcher is on top */
   }
   .back-btn {
     position: absolute;
@@ -211,11 +211,7 @@ function gameLoop() {
 
   if(currentGame === 'catch') {
     if(Math.random() < 0.02) {
-      let rand = Math.random();
-      let star = { x: Math.random()*canvas.width, y:0, size:25, color:'yellow', points:1 };
-      if(rand < 0.1){ star.color='green'; star.points=3; } // bonus
-      else if(rand < 0.2){ star.color='orange'; star.points=-2; } // negative
-      stars.push(star);
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: 'yellow', points: 1});
     }
 
     for(let i=0;i<stars.length;i++){
@@ -226,7 +222,7 @@ function gameLoop() {
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      if(s.y > canvas.height - catcherHeight - 10 && Math.abs(s.x - playerX) < catcherWidth/2){
+      if(s.y > canvas.height - catcherHeight - 10 && Math.abs(s.x - playerX) < catcherWidth / 2){
         stars.splice(i,1);
         i--;
         score += s.points;
