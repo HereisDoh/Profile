@@ -1,217 +1,88 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SnapClone</title>
-  <style>
-    body, html {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      background: black;
-      font-family: Arial, sans-serif;
-    }
-    #frontPage, #cameraPage {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: #FFFC00;
-    }
-    #cameraPage { display: none; background: black; }
-    video {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
-    #gameCanvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 2;
-    }
-    #bottomNav {
-      position: absolute;
-      bottom: 0; left: 0;
-      width: 100%; height: 60px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: rgba(0,0,0,0.6);
-      z-index: 3;
-    }
-    #bottomNav button {
-      background: none;
-      border: none;
-      font-size: 28px;
-      color: white;
-      cursor: pointer;
-    }
-    #scoreDisplay {
-      position: absolute;
-      top: 10px; right: 15px;
-      color: white;
-      font-size: 22px;
-      font-weight: bold;
-      z-index: 3;
-    }
-  </style>
-</head>
-<body>
-  <!-- Front Page -->
-  <div id="frontPage">
-    <h1>👻 SnapClone</h1>
-    <button id="cameraBtn">📷 Open Camera</button>
-  </div>
+<canvas id="gameCanvas"></canvas>
 
-  <!-- Camera Page -->
-  <div id="cameraPage">
-    <video id="camera" autoplay playsinline></video>
-    <canvas id="gameCanvas"></canvas>
-    <div id="scoreDisplay">Score: 0</div>
-    <div id="bottomNav">
-      <button id="homeBtn">🏠</button>
-      <button id="gameBtn">⭐</button>
-    </div>
-  </div>
+<script>
+canvas.style.pointerEvents = "auto"; // allow mouse events
 
-  <script>
-    const frontPage = document.getElementById("frontPage");
-    const cameraPage = document.getElementById("cameraPage");
-    const cameraBtn = document.getElementById("cameraBtn");
-    const homeBtn = document.getElementById("homeBtn");
-    const gameBtn = document.getElementById("gameBtn");
-    const video = document.getElementById("camera");
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreDisplay = document.getElementById("scoreDisplay");
+let playerX = canvas.width / 2;
+let catcherWidth = 150;
+let catcherHeight = 30;
 
-    let currentGame = null;
-    let animationFrameId;
-    let stars = [];
-    let score = 0;
-    let playerX = 0;
-    let catcherWidth = 150;
-    let catcherHeight = 30;
+canvas.addEventListener("mousemove", (e) => {
+  const rect = canvas.getBoundingClientRect();
+  playerX = e.clientX - rect.left;
+});
 
-    // Resize canvas to video
-    function resizeCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    }
-    window.addEventListener("resize", resizeCanvas);
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Open camera
-    cameraBtn.addEventListener("click", async () => {
-      frontPage.style.display = "none";
-      cameraPage.style.display = "block";
-      resizeCanvas();
-      playerX = canvas.width / 2;
+  if (currentGame === "catch") {
+    // spawn falling stars
+    if (Math.random() < 0.03) {
+      let typeRand = Math.random();
+      let type = "normal";
+      let color = "yellow";
+      let points = 1;
 
-      try {
-        let stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-      } catch (err) {
-        alert("Camera access denied: " + err);
-      }
-    });
-
-    // Home button
-    homeBtn.addEventListener("click", () => {
-      cameraPage.style.display = "none";
-      frontPage.style.display = "flex";
-      cancelAnimationFrame(animationFrameId);
-    });
-
-    // Start game
-    gameBtn.addEventListener("click", () => {
-      currentGame = "catch";
-      startGame();
-    });
-
-    // Mouse controls
-    canvas.style.pointerEvents = "auto";
-    canvas.addEventListener("mousemove", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      playerX = e.clientX - rect.left;
-    });
-
-    function startGame() {
-      stars = [];
-      score = 0;
-      scoreDisplay.textContent = "Score: 0";
-      playerX = canvas.width / 2;
-      cancelAnimationFrame(animationFrameId);
-      gameLoop();
-    }
-
-    function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      if (currentGame === "catch") {
-        // spawn stars
-        if (Math.random() < 0.04) {
-          let typeRand = Math.random();
-          let color = "yellow";
-          let points = 1;
-          if (typeRand < 0.1) {
-            color = "orange"; points = -2;
-          } else if (typeRand < 0.25) {
-            color = "green"; points = 3;
-          }
-          stars.push({ x: Math.random() * canvas.width, y: 0, size: 20, color, points });
-        }
-
-        // draw + update stars
-        for (let i = 0; i < stars.length; i++) {
-          let s = stars[i];
-          s.y += 2;
-          ctx.fillStyle = s.color;
-          ctx.beginPath();
-          ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
-          ctx.fill();
-
-          // collision
-          if (
-            s.y > canvas.height - catcherHeight - 10 &&
-            s.x > playerX - catcherWidth / 2 &&
-            s.x < playerX + catcherWidth / 2
-          ) {
-            stars.splice(i, 1);
-            i--;
-            score += s.points;
-            scoreDisplay.textContent = "Score: " + score;
-          } else if (s.y > canvas.height) {
-            stars.splice(i, 1);
-            i--;
-          }
-        }
-
-        // draw catcher
-        ctx.fillStyle = "red";
-        ctx.fillRect(
-          playerX - catcherWidth / 2,
-          canvas.height - catcherHeight - 10,
-          catcherWidth,
-          catcherHeight
-        );
-        ctx.strokeStyle = "white";
-        ctx.strokeRect(
-          playerX - catcherWidth / 2,
-          canvas.height - catcherHeight - 10,
-          catcherWidth,
-          catcherHeight
-        );
+      if (typeRand < 0.1) {
+        type = "negative";
+        color = "orange";
+        points = -2;
+      } else if (typeRand < 0.25) {
+        type = "bonus";
+        color = "green";
+        points = 3;
       }
 
-      animationFrameId = requestAnimationFrame(gameLoop);
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: 0,
+        size: 25,
+        color: color,
+        points: points
+      });
     }
-  </script>
-</body>
-</html>
+
+    // update + draw stars
+    for (let i = 0; i < stars.length; i++) {
+      let s = stars[i];
+      s.y += 2;
+      ctx.fillStyle = s.color;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+      ctx.fill();
+
+      // collision check
+      if (
+        s.y > canvas.height - catcherHeight - 10 &&
+        Math.abs(s.x - playerX) < catcherWidth / 2
+      ) {
+        stars.splice(i, 1);
+        i--;
+        score += s.points;
+        scoreDisplay.textContent = "Score: " + score;
+      } else if (s.y > canvas.height) {
+        stars.splice(i, 1);
+        i--;
+      }
+    }
+
+    // draw catcher
+    ctx.fillStyle = "red";
+    ctx.fillRect(
+      playerX - catcherWidth / 2,
+      canvas.height - catcherHeight - 10,
+      catcherWidth,
+      catcherHeight
+    );
+    ctx.strokeStyle = "white";
+    ctx.strokeRect(
+      playerX - catcherWidth / 2,
+      canvas.height - catcherHeight - 10,
+      catcherWidth,
+      catcherHeight
+    );
+  }
+
+  animationFrameId = requestAnimationFrame(gameLoop);
+}
+</script>
