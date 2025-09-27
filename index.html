@@ -58,7 +58,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    pointer-events: none;
     z-index: 2;
   }
   .game-select, .filter-select, .score-display {
@@ -145,18 +144,21 @@ const scoreDisplay = document.getElementById('scoreDisplay');
 let currentGame = null;
 let animationFrameId;
 let stars = [];
-let playerX = window.innerWidth / 2;
 let score = 0;
+
+let playerX;
+let catcherWidth = 150;
+let catcherHeight = 30;
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-}
-window.addEventListener('resize', () => {
-  resizeCanvas();
   playerX = canvas.width / 2;
-});
+}
+window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
+
+canvas.style.pointerEvents = "auto"; // allow mouse movement
 
 cameraIcon.addEventListener('click', async () => {
   frontPage.style.display = 'none';
@@ -167,7 +169,6 @@ cameraIcon.addEventListener('click', async () => {
     video.srcObject = stream;
     await video.play();
     resizeCanvas();
-    playerX = canvas.width / 2;
   } catch (err) {
     alert('Camera access denied or not available.');
   }
@@ -229,7 +230,7 @@ function gameLoop() {
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      if(s.y > canvas.height-40 && Math.abs(s.x-playerX)<75){
+      if(s.y > canvas.height - catcherHeight - 10 && Math.abs(s.x - playerX) < catcherWidth / 2){
         stars.splice(i,1);
         i--;
         score += s.points;
@@ -240,11 +241,11 @@ function gameLoop() {
       }
     }
 
-    // Draw larger, visible catcher
+    // Draw catcher always at bottom
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-75, canvas.height-40, 150, 30);
+    ctx.fillRect(playerX - catcherWidth/2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
     ctx.strokeStyle = 'white';
-    ctx.strokeRect(playerX-75, canvas.height-40, 150, 30);
+    ctx.strokeRect(playerX - catcherWidth/2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
@@ -256,4 +257,4 @@ function applyFilter(filter) {
 </script>
 
 </body>
-</
+</html>
