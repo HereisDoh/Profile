@@ -97,8 +97,8 @@
     let stars = [];
     let score = 0;
     let playerX = 0;
-    let catcherWidth = 150;
-    let catcherHeight = 30;
+    let catcherWidth = 180;  // bigger
+    let catcherHeight = 35;  // bigger
 
     // Resize canvas to video
     function resizeCanvas() {
@@ -193,16 +193,9 @@
           }
         }
 
-        // draw catcher
+        // draw BIG RED catcher
         ctx.fillStyle = "red";
         ctx.fillRect(
-          playerX - catcherWidth / 2,
-          canvas.height - catcherHeight - 10,
-          catcherWidth,
-          catcherHeight
-        );
-        ctx.strokeStyle = "white";
-        ctx.strokeRect(
           playerX - catcherWidth / 2,
           canvas.height - catcherHeight - 10,
           catcherWidth,
