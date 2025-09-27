@@ -44,23 +44,13 @@
     max-height: 100%;
     border-radius: 10px;
     filter: none;
+    display: block;
   }
   canvas {
     position: absolute;
     top: 0;
     left: 0;
-    z-index: 5; /* ensure catcher is on top */
-  }
-  .back-btn {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    padding: 8px 12px;
-    background: #fffc00;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+    pointer-events: none; /* allow clicks through canvas */
   }
   .game-select {
     position: absolute;
@@ -80,7 +70,7 @@
   }
   .filter-select {
     position: absolute;
-    bottom: 40px;
+    bottom: 50px;
     display: flex;
     gap: 10px;
     overflow-x: auto;
@@ -103,7 +93,6 @@
     background: rgba(0,0,0,0.5);
     padding: 5px 10px;
     border-radius: 8px;
-    z-index: 6;
   }
 </style>
 </head>
@@ -115,7 +104,6 @@
 </div>
 
 <div class="camera-page" id="cameraPage" style="display:none;">
-  <button class="back-btn" id="backBtn">⬅ Back</button>
   <video id="camera" autoplay playsinline></video>
   <canvas id="gameCanvas"></canvas>
   <div class="score-display" id="scoreDisplay">Score: 0</div>
@@ -137,7 +125,7 @@
 
 <nav>
   <span id="cameraIcon">📷</span>
-  <span>👥</span>
+  <span id="homeIcon">🏠</span>
   <span>💬</span>
   <span>⭐</span>
 </nav>
@@ -146,8 +134,8 @@
 const frontPage = document.getElementById('frontPage');
 const cameraPage = document.getElementById('cameraPage');
 const cameraIcon = document.getElementById('cameraIcon');
+const homeIcon = document.getElementById('homeIcon');
 const video = document.getElementById('camera');
-const backBtn = document.getElementById('backBtn');
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreDisplay = document.getElementById('scoreDisplay');
@@ -157,31 +145,27 @@ let animationFrameId;
 let stars = [];
 let playerX = 0;
 let score = 0;
-let catcherWidth = 100;
-let catcherHeight = 20;
 
-function resizeCanvas() {
-  canvas.width = video.videoWidth || window.innerWidth;
-  canvas.height = video.videoHeight || window.innerHeight;
-  playerX = canvas.width / 2;
-}
-
-cameraIcon.addEventListener('click', () => {
+cameraIcon.addEventListener('click', async () => {
   frontPage.style.display = 'none';
   cameraPage.style.display = 'flex';
 
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      video.srcObject = stream;
-      video.play();
-      resizeCanvas();
-    })
-    .catch(err => {
-      alert('Camera access denied or not available.');
-    });
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    video.srcObject = stream;
+    await video.play();
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // Initialize catcher in center
+    playerX = canvas.width / 2;
+  } catch (err) {
+    alert('Camera access denied or not available.');
+  }
 });
 
-backBtn.addEventListener('click', () => {
+homeIcon.addEventListener('click', () => {
   cameraPage.style.display = 'none';
   frontPage.style.display = 'flex';
   let tracks = video.srcObject ? video.srcObject.getTracks() : [];
@@ -210,8 +194,23 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    if(Math.random() < 0.02) {
-      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: 'yellow', points: 1});
+    if(Math.random() < 0.03) {
+      let typeRand = Math.random();
+      let type = 'normal';
+      let color = 'yellow';
+      let points = 1;
+
+      if(typeRand < 0.1){
+        type = 'negative';
+        color = 'orange';
+        points = -2;
+      } else if(typeRand < 0.25){
+        type = 'bonus';
+        color = 'green';
+        points = 3;
+      }
+
+      stars.push({x: Math.random()*canvas.width, y: 0, size: 25, color: color, points: points});
     }
 
     for(let i=0;i<stars.length;i++){
@@ -222,7 +221,7 @@ function gameLoop() {
       ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
       ctx.fill();
 
-      if(s.y > canvas.height - catcherHeight - 10 && Math.abs(s.x - playerX) < catcherWidth / 2){
+      if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<50){
         stars.splice(i,1);
         i--;
         score += s.points;
@@ -234,10 +233,7 @@ function gameLoop() {
     }
 
     ctx.fillStyle = 'red';
-    ctx.fillRect(playerX-catcherWidth/2, canvas.height-catcherHeight-10, catcherWidth, catcherHeight);
-    ctx.strokeStyle = 'white';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(playerX-catcherWidth/2, canvas.height-catcherHeight-10, catcherWidth, catcherHeight);
+    ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
   }
 
   animationFrameId = requestAnimationFrame(gameLoop);
@@ -246,8 +242,6 @@ function gameLoop() {
 function applyFilter(filter) {
   video.style.filter = filter;
 }
-
-window.addEventListener('resize', resizeCanvas);
 </script>
 
 </body>
