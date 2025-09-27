@@ -34,7 +34,8 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      z-index: 2;
+      z-index: 5; /* bring canvas on top of video */
+      pointer-events: auto;
     }
     #bottomNav {
       position: absolute;
@@ -44,7 +45,7 @@
       justify-content: space-around;
       align-items: center;
       background: rgba(0,0,0,0.6);
-      z-index: 3;
+      z-index: 6;
     }
     #bottomNav button {
       background: none;
@@ -59,7 +60,7 @@
       color: white;
       font-size: 22px;
       font-weight: bold;
-      z-index: 3;
+      z-index: 6;
     }
   </style>
 </head>
@@ -97,17 +98,15 @@
     let stars = [];
     let score = 0;
     let playerX = 0;
-    let catcherWidth = 180;  // bigger
-    let catcherHeight = 35;  // bigger
+    let catcherWidth = 180;
+    let catcherHeight = 35;
 
-    // Resize canvas to video
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
     window.addEventListener("resize", resizeCanvas);
 
-    // Open camera
     cameraBtn.addEventListener("click", async () => {
       frontPage.style.display = "none";
       cameraPage.style.display = "block";
@@ -122,20 +121,17 @@
       }
     });
 
-    // Home button
     homeBtn.addEventListener("click", () => {
       cameraPage.style.display = "none";
       frontPage.style.display = "flex";
       cancelAnimationFrame(animationFrameId);
     });
 
-    // Start game
     gameBtn.addEventListener("click", () => {
       currentGame = "catch";
       startGame();
     });
 
-    // Mouse controls
     canvas.style.pointerEvents = "auto";
     canvas.addEventListener("mousemove", (e) => {
       const rect = canvas.getBoundingClientRect();
@@ -155,20 +151,15 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       if (currentGame === "catch") {
-        // spawn stars
         if (Math.random() < 0.04) {
           let typeRand = Math.random();
           let color = "yellow";
           let points = 1;
-          if (typeRand < 0.1) {
-            color = "orange"; points = -2;
-          } else if (typeRand < 0.25) {
-            color = "green"; points = 3;
-          }
+          if (typeRand < 0.1) { color = "orange"; points = -2; }
+          else if (typeRand < 0.25) { color = "green"; points = 3; }
           stars.push({ x: Math.random() * canvas.width, y: 0, size: 20, color, points });
         }
 
-        // draw + update stars
         for (let i = 0; i < stars.length; i++) {
           let s = stars[i];
           s.y += 2;
@@ -177,12 +168,7 @@
           ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
           ctx.fill();
 
-          // collision
-          if (
-            s.y > canvas.height - catcherHeight - 10 &&
-            s.x > playerX - catcherWidth / 2 &&
-            s.x < playerX + catcherWidth / 2
-          ) {
+          if (s.y > canvas.height - catcherHeight - 10 && s.x > playerX - catcherWidth / 2 && s.x < playerX + catcherWidth / 2) {
             stars.splice(i, 1);
             i--;
             score += s.points;
@@ -193,14 +179,12 @@
           }
         }
 
-        // draw BIG RED catcher
+        // Big Red catcher with white outline
         ctx.fillStyle = "red";
-        ctx.fillRect(
-          playerX - catcherWidth / 2,
-          canvas.height - catcherHeight - 10,
-          catcherWidth,
-          catcherHeight
-        );
+        ctx.fillRect(playerX - catcherWidth / 2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(playerX - catcherWidth / 2, canvas.height - catcherHeight - 10, catcherWidth, catcherHeight);
       }
 
       animationFrameId = requestAnimationFrame(gameLoop);
