@@ -49,7 +49,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: none;
+    /* pointer-events removed so mouse works */
   }
   .game-select {
     position: absolute;
@@ -185,14 +185,12 @@ function drawStar(ctx, x, y, radius, spikes = 5, inset = 0.5, color = "yellow") 
   let step = Math.PI / spikes;
   ctx.beginPath();
   ctx.moveTo(x, y - radius);
-
   for (let i = 0; i < spikes; i++) {
     ctx.lineTo(x + Math.cos(rot) * radius, y + Math.sin(rot) * radius);
     rot += step;
     ctx.lineTo(x + Math.cos(rot) * radius * inset, y + Math.sin(rot) * radius * inset);
     rot += step;
   }
-
   ctx.closePath();
   ctx.fillStyle = color;
   ctx.fill();
@@ -213,8 +211,8 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    // Semi-transparent midnight blue background
-    ctx.fillStyle = "rgba(25, 25, 112, 0.2)"; // 20% opacity
+    // Semi-transparent midnight blue overlay
+    ctx.fillStyle = "rgba(25, 25, 112, 0.2)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Spawn stars randomly
@@ -222,7 +220,7 @@ function gameLoop() {
       stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
     }
 
-    // Draw stars and check for paddle collision
+    // Draw stars and check collision
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
       s.y += 2;
