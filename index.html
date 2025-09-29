@@ -49,6 +49,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    pointer-events: none; /* allows mouse events to pass through if needed */
   }
   .game-select {
     position: absolute;
@@ -170,8 +171,6 @@ homeIcon.addEventListener('click', () => {
   stars = [];
   score = 0;
   scoreDisplay.textContent = 'Score: 0';
-  canvas.style.background = "transparent";
-  video.style.display = "block";
 });
 
 canvas.addEventListener('mousemove', (e) => {
@@ -203,33 +202,27 @@ function startGame(game) {
   stars = [];
   score = 0;
   scoreDisplay.textContent = 'Score: 0';
-
-  if (game === 'catch') {
-    canvas.style.background = "transparent"; // we will use overlay instead
-    video.style.display = "block"; // keep camera visible
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  } else {
-    canvas.style.background = "transparent";
-    video.style.display = "block";
-  }
-
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  video.style.display = "block"; // always show camera
   animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 function gameLoop() {
-  // Clear canvas first
+  // Clear canvas for previous frame
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    // Draw semi-transparent midnight blue overlay over the video
-    ctx.fillStyle = "rgba(25, 25, 112, 0.5)"; // midnight blue, 50% opacity
+    // Draw semi-transparent overlay without hiding camera
+    ctx.fillStyle = "rgba(25, 25, 112, 0.3)"; // midnight blue, 30% opacity
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Spawn stars randomly
     if(Math.random() < 0.02) {
       stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
     }
 
+    // Draw stars
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
       s.y += 2;
