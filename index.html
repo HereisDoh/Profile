@@ -205,8 +205,8 @@ function startGame(game) {
   scoreDisplay.textContent = 'Score: 0';
 
   if (game === 'catch') {
-    canvas.style.background = "midnightblue";
-    video.style.display = "none";
+    canvas.style.background = "transparent"; // we will use overlay instead
+    video.style.display = "block"; // keep camera visible
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   } else {
@@ -218,15 +218,14 @@ function startGame(game) {
 }
 
 function gameLoop() {
-  // Fill background for Catch Stars
-  if(currentGame === 'catch') {
-    ctx.fillStyle = "midnightblue";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  } else {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
+  // Clear canvas first
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
+    // Draw semi-transparent midnight blue overlay over the video
+    ctx.fillStyle = "rgba(25, 25, 112, 0.5)"; // midnight blue, 50% opacity
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     if(Math.random() < 0.02) {
       stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
     }
@@ -248,6 +247,7 @@ function gameLoop() {
       }
     }
 
+    // Draw paddle
     ctx.fillStyle = 'red';
     ctx.fillRect(playerX-50, canvas.height-30, 100, 20);
   }
