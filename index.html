@@ -49,7 +49,7 @@
     position: absolute;
     top: 0;
     left: 0;
-    pointer-events: none; /* mouse still goes through to video */
+    pointer-events: none;
   }
   .game-select {
     position: absolute;
@@ -173,8 +173,10 @@ homeIcon.addEventListener('click', () => {
   scoreDisplay.textContent = 'Score: 0';
 });
 
+// Fixed mouse tracking for paddle
 canvas.addEventListener('mousemove', (e) => {
-  playerX = e.offsetX;
+  const rect = canvas.getBoundingClientRect();
+  playerX = e.clientX - rect.left;
 });
 
 // Star drawing function
@@ -203,7 +205,7 @@ function startGame(game) {
   scoreDisplay.textContent = 'Score: 0';
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
-  video.style.display = "block"; // keep camera visible
+  video.style.display = "block";
   animationFrameId = requestAnimationFrame(gameLoop);
 }
 
@@ -211,7 +213,7 @@ function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   if(currentGame === 'catch') {
-    // Semi-transparent midnight blue background overlay
+    // Semi-transparent midnight blue background
     ctx.fillStyle = "rgba(25, 25, 112, 0.2)"; // 20% opacity
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -220,14 +222,12 @@ function gameLoop() {
       stars.push({x: Math.random()*canvas.width, y: 0, size: 20});
     }
 
-    // Draw stars and check for collisions with paddle
+    // Draw stars and check for paddle collision
     for(let i=0;i<stars.length;i++){
       let s = stars[i];
       s.y += 2;
-
       drawStar(ctx, s.x, s.y, s.size, 5, 0.5, "yellow");
 
-      // Check if star touches paddle
       if(s.y > canvas.height-30 && Math.abs(s.x-playerX)<50){
         stars.splice(i,1);
         i--;
